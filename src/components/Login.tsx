@@ -1,4 +1,8 @@
 import React, { useReducer, useEffect } from "react";
+import { Route, Routes, useNavigate } from "react-router-dom";
+// import { BrowserRouter as Router, Route } from 'react-router-dom';
+
+
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 
 import TextField from "@material-ui/core/TextField";
@@ -7,6 +11,9 @@ import CardContent from "@material-ui/core/CardContent";
 import CardActions from "@material-ui/core/CardActions";
 import CardHeader from "@material-ui/core/CardHeader";
 import Button from "@material-ui/core/Button";
+
+import { BASE_API_URL, post } from "../apis/common/common";
+import Dashboard from "./Dashboard";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -39,6 +46,7 @@ type State = {
   isButtonDisabled: boolean;
   helperText: string;
   isError: boolean;
+  isAuthenticated: boolean;
 };
 
 const initialState: State = {
@@ -47,6 +55,7 @@ const initialState: State = {
   isButtonDisabled: true,
   helperText: "",
   isError: false,
+  isAuthenticated: false,
 };
 
 type Action =
@@ -77,7 +86,8 @@ const reducer = (state: State, action: Action): State => {
     case "loginSuccess":
       return {
         ...state,
-        helperText: action.payload,
+        isAuthenticated: true,
+        // helperText: action.payload,
         isError: false,
       };
     case "loginFailed":
@@ -95,6 +105,7 @@ const reducer = (state: State, action: Action): State => {
 };
 
 const Login = () => {
+  const navigate = useNavigate();
   const classes = useStyles();
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -112,13 +123,23 @@ const Login = () => {
     }
   }, [state.username, state.password]);
 
-  const handleLogin = () => {
-    if (state.username === "abc@email.com" && state.password === "password") {
-      dispatch({
-        type: "loginSuccess",
-        payload: "Login Successfully",
-      });
-    } else {
+  const handleLogin = async () => {
+    const url: string = `${BASE_API_URL}/common/login`;
+    const body = {
+      userName: state.username,
+      password: state.password,
+    };
+    try {
+      const { data, status } = await post({ url, body });
+      console.log(data);
+      if (status === 200 || status === 201) {
+        dispatch({
+          type: "loginSuccess",
+          payload: "Login Successfully",
+        });
+        navigate('/dashboard')
+      }
+    } catch (error) {
       dispatch({
         type: "loginFailed",
         payload: "Incorrect username or password",
