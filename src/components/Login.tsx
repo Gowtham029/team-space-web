@@ -1,25 +1,22 @@
-import React, { useReducer, useEffect } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
-// import { BrowserRouter as Router, Route } from 'react-router-dom';
+import React, { useReducer, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
+import TextField from '@material-ui/core/TextField'
+import Card from '@material-ui/core/Card'
+import CardContent from '@material-ui/core/CardContent'
+import CardActions from '@material-ui/core/CardActions'
+import CardHeader from '@material-ui/core/CardHeader'
+import Button from '@material-ui/core/Button'
 
-import TextField from "@material-ui/core/TextField";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import CardActions from "@material-ui/core/CardActions";
-import CardHeader from "@material-ui/core/CardHeader";
-import Button from "@material-ui/core/Button";
-
-import { BASE_API_URL, post } from "../apis/common/common";
-import Dashboard from "./Dashboard";
+import { BASE_API_URL, post } from '../apis/common/common'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     container: {
-      display: "flex",
-      flexWrap: "wrap",
+      display: 'flex',
+      flexWrap: 'wrap',
       width: 400,
       margin: `${theme.spacing(0)} auto`,
     },
@@ -28,148 +25,151 @@ const useStyles = makeStyles((theme: Theme) =>
       flexGrow: 1,
     },
     header: {
-      textAlign: "center",
-      background: "#212121",
-      color: "#fff",
+      textAlign: 'center',
+      background: '#212121',
+      color: '#fff',
     },
     card: {
       marginTop: theme.spacing(10),
     },
   })
-);
+)
 
-//state type
+// state type
 
 type State = {
-  username: string;
-  password: string;
-  isButtonDisabled: boolean;
-  helperText: string;
-  isError: boolean;
-  isAuthenticated: boolean;
-};
+  username: string
+  password: string
+  isButtonDisabled: boolean
+  helperText: string
+  isError: boolean
+  isAuthenticated: boolean
+}
 
 const initialState: State = {
-  username: "",
-  password: "",
+  username: '',
+  password: '',
   isButtonDisabled: true,
-  helperText: "",
+  helperText: '',
   isError: false,
   isAuthenticated: false,
-};
+}
 
 type Action =
-  | { type: "setUsername"; payload: string }
-  | { type: "setPassword"; payload: string }
-  | { type: "setIsButtonDisabled"; payload: boolean }
-  | { type: "loginSuccess"; payload: string }
-  | { type: "loginFailed"; payload: string }
-  | { type: "setIsError"; payload: boolean };
+  | { type: 'setUsername'; payload: string }
+  | { type: 'setPassword'; payload: string }
+  | { type: 'setIsButtonDisabled'; payload: boolean }
+  | { type: 'loginSuccess'; payload: string }
+  | { type: 'loginFailed'; payload: string }
+  | { type: 'setIsError'; payload: boolean }
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case "setUsername":
+    case 'setUsername':
       return {
         ...state,
         username: action.payload,
-      };
-    case "setPassword":
+      }
+    case 'setPassword':
       return {
         ...state,
         password: action.payload,
-      };
-    case "setIsButtonDisabled":
+      }
+    case 'setIsButtonDisabled':
       return {
         ...state,
         isButtonDisabled: action.payload,
-      };
-    case "loginSuccess":
+      }
+    case 'loginSuccess':
       return {
         ...state,
         isAuthenticated: true,
-        // helperText: action.payload,
         isError: false,
-      };
-    case "loginFailed":
+      }
+    case 'loginFailed':
       return {
         ...state,
         helperText: action.payload,
         isError: true,
-      };
-    case "setIsError":
+      }
+    case 'setIsError':
       return {
         ...state,
         isError: action.payload,
-      };
+      }
+    default:
+      return {
+        ...state,
+        isError: true,
+      }
   }
-};
+}
 
-const Login = () => {
-  const navigate = useNavigate();
-  const classes = useStyles();
-  const [state, dispatch] = useReducer(reducer, initialState);
+const Login = (): JSX.Element => {
+  const navigate = useNavigate()
+  const classes = useStyles()
+  const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
     if (state.username.trim() && state.password.trim()) {
       dispatch({
-        type: "setIsButtonDisabled",
+        type: 'setIsButtonDisabled',
         payload: false,
-      });
+      })
     } else {
       dispatch({
-        type: "setIsButtonDisabled",
+        type: 'setIsButtonDisabled',
         payload: true,
-      });
+      })
     }
-  }, [state.username, state.password]);
+  }, [state.username, state.password])
 
-  const handleLogin = async () => {
-    const url: string = `${BASE_API_URL}/common/login`;
+  const handleLogin = async (): Promise<void> => {
+    const url = `${BASE_API_URL}/common/login`
     const body = {
       userName: state.username,
       password: state.password,
-    };
+    }
     try {
-      const { data, status } = await post({ url, body });
-      console.log(data);
+      const { status } = await post({ url, body })
       if (status === 200 || status === 201) {
         dispatch({
-          type: "loginSuccess",
-          payload: "Login Successfully",
-        });
+          type: 'loginSuccess',
+          payload: 'Login Successfully',
+        })
         navigate('/dashboard')
       }
     } catch (error) {
       dispatch({
-        type: "loginFailed",
-        payload: "Incorrect username or password",
-      });
+        type: 'loginFailed',
+        payload: 'Incorrect username or password',
+      })
     }
-  };
+  }
 
-  const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === "Enter" || event.which === 13) {
-      state.isButtonDisabled || handleLogin();
+  const handleKeyPress = (event: React.KeyboardEvent): void => {
+    if (event.key === 'Enter' || event.which === 13) {
+      state.isButtonDisabled || handleLogin()
     }
-  };
+  }
 
   const handleUsernameChange: React.ChangeEventHandler<HTMLInputElement> = (
     event
   ) => {
     dispatch({
-      type: "setUsername",
+      type: 'setUsername',
       payload: event.target.value,
-    });
-  };
+    })
+  }
 
   const handlePasswordChange: React.ChangeEventHandler<HTMLInputElement> = (
     event
   ) => {
     dispatch({
-      type: "setPassword",
+      type: 'setPassword',
       payload: event.target.value,
-    });
-  };
+    })
+  }
   return (
     <form className={classes.container} noValidate autoComplete="off">
       <Card className={classes.card}>
@@ -215,7 +215,7 @@ const Login = () => {
         </CardActions>
       </Card>
     </form>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

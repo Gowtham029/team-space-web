@@ -1,5 +1,3 @@
-const Dashboard = () => {
-  return <p>Welcome to Dashboard Screen</p>;
-};
+const Dashboard = (): JSX.Element => <p>Welcome to Dashboard Screen</p>
 
-export default Dashboard;
+export default Dashboard
