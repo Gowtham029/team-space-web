@@ -55,6 +55,10 @@ To check the container logs
 
 `$ docker logs -f team-space-web`
 
+### Deployment
+
+Create a docker image and push to ECR.
+
 ## Learn More
 
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
